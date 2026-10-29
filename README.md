@@ -1,2 +1,1728 @@
 # QUIMILATAMAPP
 APP DE QUÍMICA
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuimiLATAM — Aprende Química Jugando</title>
+    <!-- Google Fonts: Baloo 2 (Titles/Score) & Nunito (Body/UI) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ql: {
+                            bg: '#F8F7FF',
+                            surface: '#FFFFFF',
+                            text: '#1E1763',
+                            muted: '#5B5580',
+                            primary: '#692FF4',
+                            primaryHover: '#5A22DE',
+                            accent: '#B266FF',
+                            highlight: '#FF80F0',
+                            success: '#16A34A',
+                            error: '#DC2626',
+                            warning: '#D97706',
+                            darkBg: '#0F0B29',
+                            darkSurface: '#191342',
+                            darkText: '#F1EFFE',
+                            darkMuted: '#A29CDB'
+                        }
+                    },
+                    fontFamily: {
+                        title: ['"Baloo 2"', 'cursive', 'sans-serif'],
+                        body: ['Nunito', 'sans-serif']
+                    },
+                    borderRadius: {
+                        'btn': '16px',
+                        'card': '20px'
+                    },
+                    boxShadow: {
+                        'pressable': '0 4px 0 0 #5A22DE',
+                        'pressable-active': '0 0 0 0 #5A22DE',
+                        'card-soft': '0 4px 16px rgba(30, 23, 99, 0.06)'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F8F7FF;
+            color: #1E1763;
+        }
+        .dark body {
+            background-color: #0F0B29;
+            color: #F1EFFE;
+        }
+        .font-title {
+            font-family: 'Baloo 2', cursive, sans-serif;
+        }
+        .tabular-nums {
+            font-variant-numeric: tabular-nums;
+        }
+        .btn-pressable {
+            transition: all 0.1s ease-in-out;
+            box-shadow: 0 4px 0 0 #4C1DBF;
+        }
+        .btn-pressable:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 0 #4C1DBF;
+        }
+        .btn-pressable-accent {
+            box-shadow: 0 4px 0 0 #8C33E0;
+        }
+        .btn-pressable-accent:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 0 #8C33E0;
+        }
+        .hover-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .hover-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(105, 47, 244, 0.12);
+        }
+        /* Grid Canvas Styling for Molecule Editor */
+        .mol-grid-bg {
+            background-size: 32px 32px;
+            background-image: 
+                radial-gradient(circle, rgba(105, 47, 244, 0.15) 1.5px, transparent 1.5px);
+        }
+        .dark .mol-grid-bg {
+            background-image: 
+                radial-gradient(circle, rgba(178, 102, 255, 0.2) 1.5px, transparent 1.5px);
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col min-h-screen antialiased selection:bg-ql-accent selection:text-white">
+
+    <!-- Top Fixed Navigation / Score Panel -->
+    <header class="sticky top-0 z-40 bg-ql-surface dark:bg-ql-darkSurface border-b border-purple-100 dark:border-purple-900/30 shadow-sm px-4 py-2.5 transition-colors duration-200">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
+            
+            <!-- Logo / Brand -->
+            <button onclick="navigate('home')" class="flex items-center gap-2 group text-left focus:outline-none">
+                <div class="w-10 h-10 rounded-btn bg-ql-primary flex items-center justify-center text-white text-xl font-bold font-title shadow-sm group-hover:scale-105 transition-transform">
+                    🧪
+                </div>
+                <div>
+                    <span class="font-title text-xl font-extrabold text-ql-text dark:text-ql-darkText leading-none block">Quimi<span class="text-ql-primary dark:text-ql-accent">LATAM</span></span>
+                    <span class="text-[10px] uppercase tracking-wider font-extrabold text-ql-muted dark:text-ql-darkMuted hidden sm:block">Aprende Química</span>
+                </div>
+            </button>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center gap-1 bg-ql-bg dark:bg-ql-darkBg p-1 rounded-btn border border-purple-100 dark:border-purple-900/30">
+                <button onclick="navigate('home')" id="nav-desk-home" class="nav-desk-btn px-4 py-1.5 rounded-xl text-sm font-bold transition-all text-ql-primary dark:text-ql-accent bg-white dark:bg-ql-darkSurface shadow-sm">
+                    <i class="fa-solid fa-house mr-1.5"></i>Inicio
+                </button>
+                <button onclick="navigate('modules')" id="nav-desk-modules" class="nav-desk-btn px-4 py-1.5 rounded-xl text-sm font-bold text-ql-muted dark:text-ql-darkMuted hover:text-ql-primary transition-all">
+                    <i class="fa-solid fa-flask mr-1.5"></i>Módulos
+                </button>
+                <button onclick="navigate('progress')" id="nav-desk-progress" class="nav-desk-btn px-4 py-1.5 rounded-xl text-sm font-bold text-ql-muted dark:text-ql-darkMuted hover:text-ql-primary transition-all">
+                    <i class="fa-solid fa-trophy mr-1.5"></i>Progreso
+                </button>
+                <button onclick="navigate('about')" id="nav-desk-about" class="nav-desk-btn px-4 py-1.5 rounded-xl text-sm font-bold text-ql-muted dark:text-ql-darkMuted hover:text-ql-primary transition-all">
+                    <i class="fa-solid fa-circle-info mr-1.5"></i>Acerca de
+                </button>
+            </nav>
+
+            <!-- Score Panel Component -->
+            <div id="score-panel" class="flex items-center gap-2 sm:gap-3 bg-ql-bg dark:bg-ql-darkBg px-3 py-1.5 rounded-btn border border-purple-100 dark:border-purple-900/30">
+                <div class="flex items-center gap-1.5" title="Puntos de Experiencia (XP)">
+                    <span class="text-base sm:text-lg">⚡</span>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-extrabold uppercase text-ql-muted dark:text-ql-darkMuted leading-none hidden xs:inline">Puntos</span>
+                        <span id="score-xp" class="font-title font-bold text-sm sm:text-base text-ql-text dark:text-ql-darkText tabular-nums leading-none">240 XP</span>
+                    </div>
+                </div>
+
+                <div class="h-6 w-[1px] bg-purple-200 dark:bg-purple-800"></div>
+
+                <div class="flex items-center gap-1.5" title="Nivel Actual">
+                    <span class="text-base sm:text-lg">⭐</span>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-extrabold uppercase text-ql-muted dark:text-ql-darkMuted leading-none hidden xs:inline">Nivel</span>
+                        <span id="score-level" class="font-title font-bold text-sm sm:text-base text-ql-text dark:text-ql-darkText tabular-nums leading-none">Nvl 3</span>
+                    </div>
+                </div>
+
+                <div class="h-6 w-[1px] bg-purple-200 dark:bg-purple-800"></div>
+
+                <div class="flex items-center gap-1.5" title="Racha de días consecutivos">
+                    <span class="text-base sm:text-lg">🔥</span>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-extrabold uppercase text-ql-muted dark:text-ql-darkMuted leading-none hidden xs:inline">Racha</span>
+                        <span id="score-streak" class="font-title font-bold text-sm sm:text-base text-ql-highlight tabular-nums leading-none">5</span>
+                    </div>
+                </div>
+
+                <button onclick="toggleDarkMode()" class="ml-1 p-1.5 text-ql-muted dark:text-ql-darkMuted hover:text-ql-primary rounded-lg transition-colors" title="Cambiar Tema">
+                    <i id="theme-icon" class="fa-solid fa-moon text-base"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN SPA CONTENT ROUTER VIEW AREA -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 mb-20 md:mb-6">
+        
+        <!-- SECTION 1: HOME VIEW -->
+        <section id="view-home" class="spa-view flex flex-col items-center text-center py-6 md:py-12 space-y-8 max-w-3xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-ql-primary dark:text-ql-accent text-sm font-extrabold tracking-wide uppercase">
+                <span>🚀</span> Aprendizaje Digital Interactivo
+            </div>
+            
+            <h1 class="font-title text-4xl sm:text-5xl md:text-6xl font-extrabold text-ql-text dark:text-ql-darkText leading-tight">
+                Domina la Química de forma <span class="text-ql-primary dark:text-ql-accent">fácil y divertida</span>
+            </h1>
+            
+            <p class="text-base sm:text-lg text-ql-muted dark:text-ql-darkMuted max-w-xl leading-relaxed">
+                Diseñado para estudiantes de secundaria y preparatoria en Latinoamérica. Resuelve cuestionarios, balancea ecuaciones, simula experimentos y construye moléculas en una red interactiva.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-2">
+                <button onclick="navigate('modules')" class="btn-pressable bg-ql-primary hover:bg-ql-primaryHover text-white text-lg font-extrabold px-8 py-3.5 rounded-btn flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-gamepad text-xl"></i>
+                    Empezar a jugar
+                </button>
+                <button onclick="openModule('virtual-lab')" class="bg-white dark:bg-ql-darkSurface border-2 border-purple-200 dark:border-purple-800 text-ql-text dark:text-ql-darkText hover:border-ql-primary text-lg font-bold px-6 py-3.5 rounded-btn flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-solid fa-flask text-ql-accent"></i>
+                    Probar Laboratorio
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full pt-8 text-left">
+                <div class="bg-white dark:bg-ql-darkSurface p-5 rounded-card shadow-card-soft border border-purple-50 dark:border-purple-900/20">
+                    <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/40 text-ql-primary dark:text-ql-accent flex items-center justify-center text-xl font-bold mb-3">
+                        🥽
+                    </div>
+                    <h3 class="font-title font-bold text-lg text-ql-text dark:text-ql-darkText">Lab Virtual Interactivo</h3>
+                    <p class="text-sm text-ql-muted dark:text-ql-darkMuted mt-1">Simulaciones de pH, conservación de materia, titulación y densidad con guías paso a paso.</p>
+                </div>
+
+                <div class="bg-white dark:bg-ql-darkSurface p-5 rounded-card shadow-card-soft border border-purple-50 dark:border-purple-900/20">
+                    <div class="w-10 h-10 rounded-xl bg-pink-100 dark:bg-pink-900/40 text-ql-highlight flex items-center justify-center text-xl font-bold mb-3">
+                        🛠️
+                    </div>
+                    <h3 class="font-title font-bold text-lg text-ql-text dark:text-ql-darkText">Editor Moléculas en Red</h3>
+                    <p class="text-sm text-ql-muted dark:text-ql-darkMuted mt-1">Conecta átomos en cuadrícula con validación de valencias en tiempo real.</p>
+                </div>
+
+                <div class="bg-white dark:bg-ql-darkSurface p-5 rounded-card shadow-card-soft border border-purple-50 dark:border-purple-900/20">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-ql-accent flex items-center justify-center text-xl font-bold mb-3">
+                        📱
+                    </div>
+                    <h3 class="font-title font-bold text-lg text-ql-text dark:text-ql-darkText">100% Mobile First</h3>
+                    <p class="text-sm text-ql-muted dark:text-ql-darkMuted mt-1">Controles táctiles y diseño adaptable para jugar cómodamente en smartphones.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: MODULES MENU -->
+        <section id="view-modules" class="spa-view hidden space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-purple-100 dark:border-purple-900/30 pb-4">
+                <div>
+                    <h2 class="font-title text-3xl font-extrabold text-ql-text dark:text-ql-darkText">Módulos de Aprendizaje</h2>
+                    <p class="text-sm text-ql-muted dark:text-ql-darkMuted">Selecciona un juego o herramienta para comenzar</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                
+                <!-- Card 1: Cuestionario -->
+                <div class="bg-white dark:bg-ql-darkSurface p-5 rounded-card shadow-card-soft border border-purple-50 dark:border-purple-900/20 hover-card flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-3xl">❓</span>
+                            <span class="bg-purple-100 dark:bg-purple-900/50 text-ql-primary dark:text-ql-accent text-xs font-bold px-2.5 py-1 rounded-full">Juego</span>
+                        </div>
+                        <h3 class="font-title font-bold text-xl text-ql-text dark:text-ql-darkText">Cuestionario de Tabla Periódica</h3>
+                        <p class="text-sm text-ql-muted dark:text-ql-darkMuted mt-2 leading-relaxed">Preguntas de opción múltiple sobre elementos, símbolos, grupos y propiedades.</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between">
+                        <span class="text-xs font-bold text-ql-muted dark:text-ql-darkMuted">10 Preguntas</span>
+                        <button onclick="openModule('quiz')" class="btn-pressable bg-ql-primary text-white text-sm font-bold px-4 py-2 rounded-btn">Jugar</button>
+                    </div>
+                </div>
+
+                <!-- Card 2: Memorama de Fórmulas -->
+                <div class="bg-white dark:bg-ql-darkSurface p-5 rounded-card shadow-card-soft border border-purple-50 dark:border-purple-900/20 hover-card flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-3xl">🃏</span>
+                            <span class="bg-purple-100 dark:bg-purple-900/50 text-ql-primary dark:text-ql-accent text-xs font-bold px-2.5 py-1 rounded-full">Juego</span>
+                        </div>
+                        <h3 class="font-title font-bold text-xl text-ql-text dark:text-ql-darkText">Memorama de Fórmulas</h3>
+                        <p class="text-sm text-ql-muted dark:text-ql-darkMuted mt-2 leading-relaxed">Empareja nombres comunes de compuestos con sus fórmulas químicas correspondientes.</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between">
+                        <span class="text-xs font-bold text-ql-muted dark:text-ql-darkMuted">12 Cartas</span>
+                        <button onclick="openModule('memory')" class="btn-pressable bg-ql-primary text-white text-sm font-bold px-4 py-2 rounded-btn">Jugar</button>
+                    </div>
+                </div>
+
+                <!-- Card 3: Balanceo de Ecuaciones -->
+                <div class="bg-white dark:bg-ql-darkSurface p-5 rounded-card shadow-card-soft border border-purple-50 dark:border-purple-900/20 hover-card flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-3xl">⚖️</span>
+                            <span class="bg-purple-100 dark:bg-purple-900/50 text-ql-primary dark:text-ql-accent text-xs font-bold px-2.5 py-1 rounded-full">Juego</span>
+                        </div>
+                        <h3 class="font-title font-bold text-xl text-ql-text dark:text-ql-darkText">Balanceo de Ecuaciones</h3>
+                        <p class="text-sm text-ql-muted dark:text-ql-darkMuted mt-2 leading-relaxed">Ajusta los coeficientes estequiométricos para conservar la masa en las reacciones.</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between">
+                        <span class="text-xs font-bold text-ql-muted dark:text-ql-darkMuted">Conservación de Masa</span>
+                        <button onclick="openModule('balance')" class="btn-pressable bg-ql-primary text-white text-sm font-bold px-4 py-2 rounded-btn">Jugar</button>
+                    </div>
+                </div>
+
+                <!-- Card 4: Laboratorio Virtual -->
+                <div class="bg-white dark:bg-ql-darkSurface p-5 rounded-card shadow-card-soft border border-purple-50 dark:border-purple-900/20 hover-card flex flex-col justify-between border-l-4 border-l-emerald-500">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-3xl">🥽</span>
+                            <span class="bg-emerald-100 dark:bg-emerald-900/50 text-ql-success text-xs font-bold px-2.5 py-1 rounded-full">Mejorado</span>
+                        </div>
+                        <h3 class="font-title font-bold text-xl text-ql-text dark:text-ql-darkText">Laboratorio Virtual</h3>
+                        <p class="text-sm text-ql-muted dark:text-ql-darkMuted mt-2 leading-relaxed">Prácticas simuladas con selector aleatorio, pH, titulación, densidad y conservación de materia.</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">5 Prácticas Guiadas</span>
+                        <button onclick="openModule('virtual-lab')" class="btn-pressable bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-2 rounded-btn">Probar Lab</button>
+                    </div>
+                </div>
+
+                <!-- Card 5: Editor de Moléculas -->
+                <div class="bg-white dark:bg-ql-darkSurface p-5 rounded-card shadow-card-soft border border-purple-50 dark:border-purple-900/20 hover-card flex flex-col justify-between border-l-4 border-l-indigo-500">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-3xl">🛠️</span>
+                            <span class="bg-indigo-100 dark:bg-indigo-900/50 text-ql-accent text-xs font-bold px-2.5 py-1 rounded-full">Red Interactiva</span>
+                        </div>
+                        <h3 class="font-title font-bold text-xl text-ql-text dark:text-ql-darkText">Editor de Moléculas</h3>
+                        <p class="text-sm text-ql-muted dark:text-ql-darkMuted mt-2 leading-relaxed">Construye enlaces sobre una red interactiva con detección de valencia y presets de moléculas.</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between">
+                        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">Grid + Valencias</span>
+                        <button onclick="openModule('molecule-editor')" class="btn-pressable bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-4 py-2 rounded-btn">Construir</button>
+                    </div>
+                </div>
+
+                <!-- Card 6: Tabla Periódica -->
+                <div class="bg-white dark:bg-ql-darkSurface p-5 rounded-card shadow-card-soft border border-purple-50 dark:border-purple-900/20 hover-card flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-3xl">🧩</span>
+                            <span class="bg-purple-100 dark:bg-purple-900/50 text-ql-primary dark:text-ql-accent text-xs font-bold px-2.5 py-1 rounded-full">Herramienta</span>
+                        </div>
+                        <h3 class="font-title font-bold text-xl text-ql-text dark:text-ql-darkText">Tabla Periódica Interactiva</h3>
+                        <p class="text-sm text-ql-muted dark:text-ql-darkMuted mt-2 leading-relaxed">Explora los elementos, sus números atómicos, propiedades y usos cotidianos.</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between">
+                        <span class="text-xs font-bold text-ql-muted dark:text-ql-darkMuted">36 Elementos</span>
+                        <button onclick="openModule('periodic-table')" class="btn-pressable btn-pressable-accent bg-ql-accent text-white text-sm font-bold px-4 py-2 rounded-btn">Explorar</button>
+                    </div>
+                </div>
+
+                <!-- Card 7: Biblioteca de Teoría Interactiva -->
+                <div class="bg-white dark:bg-ql-darkSurface p-5 rounded-card shadow-card-soft border border-purple-50 dark:border-purple-900/20 hover-card flex flex-col justify-between border-l-4 border-l-purple-500">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-3xl">📚</span>
+                            <span class="bg-purple-100 dark:bg-purple-900/50 text-ql-primary dark:text-ql-accent text-xs font-bold px-2.5 py-1 rounded-full">Interactiva</span>
+                        </div>
+                        <h3 class="font-title font-bold text-xl text-ql-text dark:text-ql-darkText">Biblioteca de Teoría</h3>
+                        <p class="text-sm text-ql-muted dark:text-ql-darkMuted mt-2 leading-relaxed">Lecciones interactivas con diagramas dinámicos, simuladores conceptuales y mini-quizzes.</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-purple-50 dark:border-purple-900/20 flex items-center justify-between">
+                        <span class="text-xs font-bold text-ql-primary dark:text-ql-accent">6 Temas Clave</span>
+                        <button onclick="openModule('theory-library')" class="btn-pressable bg-ql-primary text-white text-sm font-bold px-4 py-2 rounded-btn">Estudiar</button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 3: PROGRESS VIEW -->
+        <section id="view-progress" class="spa-view hidden space-y-6">
+            <div class="border-b border-purple-100 dark:border-purple-900/30 pb-4">
+                <h2 class="font-title text-3xl font-extrabold text-ql-text dark:text-ql-darkText">Tu Progreso de Aprendizaje</h2>
+                <p class="text-sm text-ql-muted dark:text-ql-darkMuted">Estadísticas locales guardadas en tu dispositivo</p>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="bg-white dark:bg-ql-darkSurface p-4 rounded-card border border-purple-50 dark:border-purple-900/20 text-center">
+                    <span class="text-2xl">⚡</span>
+                    <div id="prog-total-xp" class="font-title font-bold text-2xl text-ql-text dark:text-ql-darkText mt-1">240 XP</div>
+                    <div class="text-xs text-ql-muted dark:text-ql-darkMuted font-bold">Experiencia Total</div>
+                </div>
+                <div class="bg-white dark:bg-ql-darkSurface p-4 rounded-card border border-purple-50 dark:border-purple-900/20 text-center">
+                    <span class="text-2xl">⭐</span>
+                    <div id="prog-current-level" class="font-title font-bold text-2xl text-ql-text dark:text-ql-darkText mt-1">Nivel 3</div>
+                    <div class="text-xs text-ql-muted dark:text-ql-darkMuted font-bold">Nivel Alcanzado</div>
+                </div>
+                <div class="bg-white dark:bg-ql-darkSurface p-4 rounded-card border border-purple-50 dark:border-purple-900/20 text-center">
+                    <span class="text-2xl">🔥</span>
+                    <div id="prog-streak-days" class="font-title font-bold text-2xl text-ql-highlight mt-1">5 Días</div>
+                    <div class="text-xs text-ql-muted dark:text-ql-darkMuted font-bold">Racha Actual</div>
+                </div>
+                <div class="bg-white dark:bg-ql-darkSurface p-4 rounded-card border border-purple-50 dark:border-purple-900/20 text-center">
+                    <span class="text-2xl">🏅</span>
+                    <div id="prog-unlocked-badges" class="font-title font-bold text-2xl text-ql-primary dark:text-ql-accent mt-1">3 / 8</div>
+                    <div class="text-xs text-ql-muted dark:text-ql-darkMuted font-bold">Logros Obtenidos</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: ABOUT VIEW -->
+        <section id="view-about" class="spa-view hidden space-y-6">
+            <div class="border-b border-purple-100 dark:border-purple-900/30 pb-4">
+                <h2 class="font-title text-3xl font-extrabold text-ql-text dark:text-ql-darkText">Acerca de QuimiLATAM</h2>
+                <p class="text-sm text-ql-muted dark:text-ql-darkMuted">Propósito educativo y simulaciones accesibles</p>
+            </div>
+
+            <div class="bg-white dark:bg-ql-darkSurface p-6 rounded-card border border-purple-50 dark:border-purple-900/20 space-y-4">
+                <h3 class="font-title font-bold text-xl text-ql-primary dark:text-ql-accent">Propósito Educativo</h3>
+                <p class="text-sm text-ql-muted dark:text-ql-darkMuted leading-relaxed">
+                    <strong>QuimiLATAM</strong> transforma el estudio de la química para estudiantes de educación secundaria y preparatoria en América Latina (13 a 18 años). Ofrece entornos simulados interactivos para experimentar de forma completamente segura desde dispositivos móviles y computadoras.
+                </p>
+            </div>
+        </section>
+
+        <!-- ACTIVE MODULE CONTAINER VIEW -->
+        <section id="view-module-active" class="spa-view hidden space-y-4">
+            <div class="flex items-center justify-between bg-white dark:bg-ql-darkSurface p-4 rounded-card border border-purple-100 dark:border-purple-900/30 shadow-sm">
+                <button onclick="navigate('modules')" class="btn-pressable bg-slate-100 dark:bg-slate-800 text-ql-text dark:text-ql-darkText font-bold px-4 py-2 rounded-btn text-xs flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Volver a Módulos
+                </button>
+                <h2 id="active-module-title" class="font-title font-bold text-lg text-ql-text dark:text-ql-darkText">Módulo Interactivo</h2>
+            </div>
+            
+            <div id="module-content-placeholder" class="bg-white dark:bg-ql-darkSurface p-6 rounded-card border border-purple-100 dark:border-purple-900/30 shadow-card-soft">
+                <!-- Dynamic module content injected here -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Mobile Navigation Bar -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-ql-surface dark:bg-ql-darkSurface border-t border-purple-100 dark:border-purple-900/30 px-2 py-1.5 flex items-center justify-around shadow-lg">
+        <button onclick="navigate('home')" id="nav-mob-home" class="nav-mob-btn flex flex-col items-center p-1.5 rounded-xl text-ql-primary dark:text-ql-accent font-bold">
+            <i class="fa-solid fa-house text-lg"></i>
+            <span class="text-[10px] mt-0.5">Inicio</span>
+        </button>
+        <button onclick="navigate('modules')" id="nav-mob-modules" class="nav-mob-btn flex flex-col items-center p-1.5 rounded-xl text-ql-muted dark:text-ql-darkMuted font-bold">
+            <i class="fa-solid fa-flask text-lg"></i>
+            <span class="text-[10px] mt-0.5">Módulos</span>
+        </button>
+        <button onclick="navigate('progress')" id="nav-mob-progress" class="nav-mob-btn flex flex-col items-center p-1.5 rounded-xl text-ql-muted dark:text-ql-darkMuted font-bold">
+            <i class="fa-solid fa-trophy text-lg"></i>
+            <span class="text-[10px] mt-0.5">Progreso</span>
+        </button>
+        <button onclick="navigate('about')" id="nav-mob-about" class="nav-mob-btn flex flex-col items-center p-1.5 rounded-xl text-ql-muted dark:text-ql-darkMuted font-bold">
+            <i class="fa-solid fa-circle-info text-lg"></i>
+            <span class="text-[10px] mt-0.5">Acerca de</span>
+        </button>
+    </nav>
+
+    <!-- Application Logic & Module Engine -->
+    <script>
+        const appState = {
+            currentView: 'home',
+            activeModule: null,
+            score: { xp: 240, level: 3, streak: 5 },
+            isDarkMode: false
+        };
+
+        // --- SPA NAVIGATION ---
+        function navigate(viewId) {
+            appState.currentView = viewId;
+            document.querySelectorAll('.spa-view').forEach(v => v.classList.add('hidden'));
+            const target = document.getElementById(`view-${viewId}`);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-desk-btn').forEach(btn => {
+                btn.classList.remove('text-ql-primary', 'dark:text-ql-accent', 'bg-white', 'dark:bg-ql-darkSurface', 'shadow-sm');
+                btn.classList.add('text-ql-muted', 'dark:text-ql-darkMuted');
+            });
+            const activeDeskNav = document.getElementById(`nav-desk-${viewId}`);
+            if (activeDeskNav) {
+                activeDeskNav.classList.remove('text-ql-muted', 'dark:text-ql-darkMuted');
+                activeDeskNav.classList.add('text-ql-primary', 'dark:text-ql-accent', 'bg-white', 'dark:bg-ql-darkSurface', 'shadow-sm');
+            }
+
+            document.querySelectorAll('.nav-mob-btn').forEach(btn => {
+                btn.classList.remove('text-ql-primary', 'dark:text-ql-accent');
+                btn.classList.add('text-ql-muted', 'dark:text-ql-darkMuted');
+            });
+            const activeMobNav = document.getElementById(`nav-mob-${viewId}`);
+            if (activeMobNav) {
+                activeMobNav.classList.remove('text-ql-muted', 'dark:text-ql-darkMuted');
+                activeMobNav.classList.add('text-ql-primary', 'dark:text-ql-accent');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleDarkMode() {
+            appState.isDarkMode = !appState.isDarkMode;
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (appState.isDarkMode) {
+                html.classList.add('dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                html.classList.remove('dark');
+                icon.classList.replace('fa-sun', 'fa-moon');
+            }
+        }
+
+        // --- MODULE ROUTER ---
+        function openModule(moduleId) {
+            appState.activeModule = moduleId;
+            const container = document.getElementById('module-content-placeholder');
+            document.querySelectorAll('.spa-view').forEach(v => v.classList.add('hidden'));
+            document.getElementById('view-module-active').classList.remove('hidden');
+
+            if (moduleId === 'virtual-lab') {
+                document.getElementById('active-module-title').innerText = '🥽 Laboratorio Virtual Interactivo';
+                renderVirtualLab(container);
+            } else if (moduleId === 'molecule-editor') {
+                document.getElementById('active-module-title').innerText = '🛠️ Editor de Moléculas en Red';
+                renderMoleculeEditor(container);
+            } else if (moduleId === 'theory-library') {
+                document.getElementById('active-module-title').innerText = '📚 Biblioteca de Teoría Interactiva';
+                renderTheoryLibrary(container);
+            } else {
+                document.getElementById('active-module-title').innerText = 'Módulo Interactivo';
+                container.innerHTML = `
+                    <div class="text-center py-12 space-y-4">
+                        <span class="text-4xl">🧪</span>
+                        <h3 class="font-title font-bold text-2xl text-ql-text dark:text-ql-darkText">Módulo en Desarrollo</h3>
+                        <p class="text-ql-muted dark:text-ql-darkMuted text-sm">Selecciona el Laboratorio Virtual, Editor de Moléculas o Biblioteca para interactuar.</p>
+                        <button onclick="navigate('modules')" class="bg-ql-primary text-white font-bold px-4 py-2 rounded-btn text-sm">Volver al Menú</button>
+                    </div>
+                `;
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // =========================================================================
+        // 3. BIBLIOTECA DE TEORÍA INTERACTIVA Y DINÁMICA CON SIMULADORES EN VIVO
+        // =========================================================================
+
+        const theoryTopics = [
+            {
+                id: 'atomic-structure',
+                title: '1. Estructura Atómica y Partículas Subatómicas',
+                category: 'Fundamentos',
+                icon: '⚛️',
+                summary: 'El átomo es la unidad fundamental de la materia. Compuesto por un núcleo central de protones y neutrones, rodeado por electrones.',
+                content: `
+                    <p class="mb-3">Toda la materia está formada por átomos. Los átomos contienen tres partículas subatómicas principales:</p>
+                    <ul class="list-disc list-inside space-y-1 mb-4 text-xs">
+                        <li><strong>Protones (p⁺):</strong> Carga positiva, ubicados en el núcleo. Definen el <em>Número Atómico (Z)</em>.</li>
+                        <li><strong>Neutrones (n⁰):</strong> Carga neutra, ubicados en el núcleo. Aportan masa al átomo junto con los protones ($A = Z + N$).</li>
+                        <li><strong>Electrones (e⁻):</strong> Carga negativa, orbitan en niveles de energía alrededor del núcleo. Definen la carga neta del átomo o ión.</li>
+                    </ul>
+                `,
+                interactiveType: 'atom-simulator',
+                quiz: {
+                    question: 'Si un átomo neutro de Carbono tiene 6 protones y 6 neutrones, ¿cuántos electrones tiene?',
+                    options: ['12 electrones', '6 electrones', '0 electrones', '18 electrones'],
+                    correctIndex: 1,
+                    explanation: 'En un átomo neutro, el número de electrones es exactamente igual al número de protones (Z = 6).'
+                },
+                linkModule: 'molecule-editor',
+                linkText: 'Ir a Construir Moléculas'
+            },
+            {
+                id: 'periodic-table-theory',
+                title: '2. Tabla Periódica y Propiedades Periódicas',
+                category: 'Organización',
+                icon: '🧩',
+                summary: 'Los elementos químicos están organizados por su número atómico creciente y divididos en grupos, periodos y bloques.',
+                content: `
+                    <p class="mb-3">La Tabla Periódica organiza los elementos de acuerdo con sus configuraciones electrónicas y propiedades químicas recurrentes:</p>
+                    <ul class="list-disc list-inside space-y-1 mb-4 text-xs">
+                        <li><strong>Grupos (Columnas):</strong> Elementos con la misma cantidad de electrones de valencia y propiedades químicas similares.</li>
+                        <li><strong>Periodos (Filas):</strong> Indican el número de niveles de energía ocupados por los electrones.</li>
+                        <li><strong>Electronegatividad:</strong> Tendencia de un átomo a atraer electrones en un enlace químico (aumenta hacia la derecha y hacia arriba).</li>
+                    </ul>
+                `,
+                interactiveType: 'periodic-trends',
+                quiz: {
+                    question: '¿Qué propiedad periódica indica la capacidad de un átomo para atraer electrones en un enlace?',
+                    options: ['Masa Atómica', 'Radio Atómico', 'Electronegatividad', 'Número de Neutrones'],
+                    correctIndex: 2,
+                    explanation: 'La electronegatividad mide la atracción que ejerce un núcleo atómico sobre los electrones compartidos.'
+                },
+                linkModule: 'periodic-table',
+                linkText: 'Explorar Tabla Periódica'
+            },
+            {
+                id: 'chemical-bonds',
+                title: '3. Enlaces Químicos: Covalente e Iónico',
+                category: 'Unión Molecular',
+                icon: '🔗',
+                summary: 'Los átomos se unen para alcanzar estabilidad electrónica (Regla del Octeto) mediante transferencia o compartición de electrones.',
+                content: `
+                    <p class="mb-3">Los átomos interaccionan entre sí para completar 8 electrones en su último nivel de energía:</p>
+                    <ul class="list-disc list-inside space-y-1 mb-4 text-xs">
+                        <li><strong>Enlace Covalente:</strong> Ocurre principalmente entre no metales que <em>comparten</em> pares de electrones (ej. $H_2O, CO_2$).</li>
+                        <li><strong>Enlace Iónico:</strong> Ocurre entre un metal y un no metal por <em>transferencia</em> de electrones, formando cationes (+) y aniones (-) (ej. $NaCl$).</li>
+                    </ul>
+                `,
+                interactiveType: 'bond-simulator',
+                quiz: {
+                    question: '¿Qué tipo de enlace se forma cuando el Sodio (Na) cede un electrón al Cloro (Cl)?',
+                    options: ['Enlace Covalente No Polar', 'Enlace Iónico', 'Enlace Metálico', 'Enlace de Hidrógeno'],
+                    correctIndex: 1,
+                    explanation: 'Al transferirse un electrón de un metal (Na) a un no metal (Cl), se generan iones con cargas opuestas ($Na^+$ y $Cl^-$) que forman un Enlace Iónico.'
+                },
+                linkModule: 'molecule-editor',
+                linkText: 'Editar Enlaces en Red'
+            },
+            {
+                id: 'reactions-balance',
+                title: '4. Reacciones y Conservación de Masa',
+                category: 'Estequiometría',
+                icon: '⚖️',
+                summary: 'En toda reacción química, los átomos de los reactivos se reorganizan para formar productos sin alterar la cantidad total de cada elemento.',
+                content: `
+                    <p class="mb-3">Las reacciones químicas se representan mediante ecuaciones químicas. La <strong>Ley de Lavoisier</strong> establece que el número de átomos de cada elemento en los reactivos debe ser igual al número de átomos en los productos:</p>
+                    <p class="bg-purple-50 dark:bg-purple-950/40 p-2 rounded-lg border text-xs font-mono mb-3">
+                        Reactivos $\\rightarrow$ Productos &nbsp;|&nbsp; $2H_2 + O_2 \\rightarrow 2H_2O$
+                    </p>
+                `,
+                interactiveType: 'balance-simulator',
+                quiz: {
+                    question: '¿Qué número debemos colocar como coeficiente del $O_2$ para balancear la ecuación: $2H_2 + ? O_2 \\rightarrow 2H_2O$?',
+                    options: ['1', '2', '3', '4'],
+                    correctIndex: 0,
+                    explanation: 'Con coeficiente 1 en $O_2$ tenemos 2 átomos de Oxígeno en los reactivos, igualando los 2 átomos de Oxígeno presentes en $2H_2O$.'
+                },
+                linkModule: 'balance',
+                linkText: 'Juego de Balanceo'
+            },
+            {
+                id: 'acid-base-theory',
+                title: '5. Ácidos, Bases y la Escala de pH',
+                category: 'Soluciones',
+                icon: '🧪',
+                summary: 'La escala de pH mide el grado de acidez o basicidad de una solución acuosa en un rango de 0 a 14.',
+                content: `
+                    <p class="mb-3">Los ácidos y las bases son sustancias cotidianas con propiedades químicas contrastantes:</p>
+                    <ul class="list-disc list-inside space-y-1 mb-4 text-xs">
+                        <li><strong>Ácidos (pH &lt; 7):</strong> Sabor agrio, liberan iones $H^+$, viran el tornasol a rojo (ej. limón, vinagre).</li>
+                        <li><strong>Neutro (pH = 7):</strong> Equilibrio de iones (ej. agua pura a 25 °C).</li>
+                        <li><strong>Bases (pH &gt; 7):</strong> Resbaladizas al tacto, liberan iones $OH^-$, viran el tornasol a azul (ej. jabón, antiácidos).</li>
+                    </ul>
+                `,
+                interactiveType: 'ph-scale',
+                quiz: {
+                    question: '¿Qué valor de pH caracteriza a una solución completamente neutra?',
+                    options: ['pH = 0', 'pH = 7', 'pH = 14', 'pH = 3.5'],
+                    correctIndex: 1,
+                    explanation: 'El pH 7 representa la neutralidad perfecta en soluciones acuosas a temperatura ambiente.'
+                },
+                linkModule: 'virtual-lab',
+                linkText: 'Ir al Lab de pH'
+            },
+            {
+                id: 'solutions-concentration',
+                title: '6. Disoluciones y Saturación de Soluto',
+                category: 'Mezclas',
+                icon: '💧',
+                summary: 'Una disolución es una mezcla homogénea formada por un soluto disperso de forma uniforme en un solvente.',
+                content: `
+                    <p class="mb-3">Dependiendo de la cantidad de soluto disuelto a una temperatura determinada, las soluciones se clasifican en:</p>
+                    <ul class="list-disc list-inside space-y-1 mb-4 text-xs">
+                        <li><strong>Insaturada:</strong> Contiene menos soluto del que el solvente puede disolver.</li>
+                        <li><strong>Saturada:</strong> Contiene la máxima cantidad de soluto disuelto en equilibrio.</li>
+                        <li><strong>Sobresaturada / Precipitado:</strong> Exceso de soluto que no se disuelve y se acumula en el fondo.</li>
+                    </ul>
+                `,
+                interactiveType: 'solubility-simulator',
+                quiz: {
+                    question: '¿Cómo se le llama a la sustancia que se encuentra en menor proporción en una solución?',
+                    options: ['Solvente', 'Soluto', 'Precipitado', 'Mezcla Heterogénea'],
+                    correctIndex: 1,
+                    explanation: 'El soluto es la sustancia que se disuelve en el solvente (como la sal en el agua).'
+                },
+                linkModule: 'virtual-lab',
+                linkText: 'Probar Experimentos'
+            }
+        ];
+
+        let selectedTheoryIndex = 0;
+        let theorySimState = {
+            protons: 6,
+            neutrons: 6,
+            electrons: 6,
+            trendProp: 'electronegativity',
+            bondType: 'covalent',
+            soluteAmount: 2,
+            quizSelected: null
+        };
+
+        function renderTheoryLibrary(container) {
+            const topic = theoryTopics[selectedTheoryIndex];
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Topics Selector Tabs -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-purple-100 dark:border-purple-900/30 scrollbar-none">
+                        ${theoryTopics.map((t, idx) => `
+                            <button onclick="changeTheoryTopic(${idx})" class="shrink-0 px-3.5 py-2 rounded-btn text-xs font-bold transition-all flex items-center gap-1.5 ${idx === selectedTheoryIndex ? 'bg-ql-primary text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-ql-muted dark:text-ql-darkMuted hover:bg-purple-100'}">
+                                <span>${t.icon}</span> ${t.title.split('.')[1]}
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <!-- Main Article Content Layout -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        
+                        <!-- Left Panel: Lesson Explanation & Quiz (7 Cols) -->
+                        <div class="lg:col-span-7 space-y-5">
+                            <div class="bg-purple-50/60 dark:bg-purple-950/30 p-4 rounded-card border border-purple-100 dark:border-purple-900/20">
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-ql-primary dark:text-ql-accent">${topic.category}</span>
+                                <h3 class="font-title font-bold text-2xl text-ql-text dark:text-ql-darkText flex items-center gap-2 mt-0.5">
+                                    <span>${topic.icon}</span> ${topic.title}
+                                </h3>
+                                <p class="text-xs text-ql-muted dark:text-ql-darkMuted font-semibold mt-1">
+                                    ${topic.summary}
+                                </p>
+                            </div>
+
+                            <div class="text-sm text-ql-text dark:text-ql-darkText leading-relaxed space-y-2">
+                                ${topic.content}
+                            </div>
+
+                            <!-- Mini-Quiz for Self Evaluation -->
+                            <div class="bg-white dark:bg-ql-darkSurface p-4 rounded-card border border-purple-100 dark:border-purple-900/30 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-title font-bold text-sm text-ql-text dark:text-ql-darkText flex items-center gap-1.5">
+                                        <i class="fa-solid fa-circle-question text-ql-primary"></i> Auto-evaluación Rápida
+                                    </h4>
+                                    <span class="text-[10px] font-bold text-ql-muted dark:text-ql-darkMuted">1 Pregunta</span>
+                                </div>
+                                
+                                <p class="text-xs font-bold text-ql-text dark:text-ql-darkText">${topic.quiz.question}</p>
+                                
+                                <div class="grid grid-cols-1 gap-2">
+                                    ${topic.quiz.options.map((opt, optIdx) => `
+                                        <button onclick="checkTheoryQuiz(${optIdx})" class="p-2.5 rounded-xl border-2 text-xs font-bold text-left transition-all ${getTheoryQuizOptionClass(optIdx, topic.quiz)}">
+                                            ${opt}
+                                        </button>
+                                    `).join('')}
+                                </div>
+
+                                ${theorySimState.quizSelected !== null ? `
+                                    <div class="p-3 rounded-xl text-xs font-semibold ${theorySimState.quizSelected === topic.quiz.correctIndex ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200'}">
+                                        ${theorySimState.quizSelected === topic.quiz.correctIndex ? '🎉 ¡Correcto! ' : '❌ Casi... '}
+                                        ${topic.quiz.explanation}
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <!-- Direct Link to Related Activity -->
+                            <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-900/60 p-3 rounded-card border border-slate-200 dark:border-slate-800">
+                                <span class="text-xs font-bold text-ql-muted dark:text-ql-darkMuted">¿Quieres ponerlo en práctica?</span>
+                                <button onclick="openModule('${topic.linkModule}')" class="btn-pressable bg-ql-primary text-white text-xs font-bold px-3.5 py-1.5 rounded-btn flex items-center gap-1.5">
+                                    ${topic.linkText} <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Interactive Visual Diagram / Simulator (5 Cols) -->
+                        <div class="lg:col-span-5 bg-slate-50 dark:bg-slate-900/50 p-5 rounded-card border border-slate-200 dark:border-slate-800 flex flex-col justify-between min-h-[360px]">
+                            <div class="flex items-center justify-between mb-3 border-b border-slate-200 dark:border-slate-800 pb-2">
+                                <span class="text-xs font-extrabold uppercase tracking-wider text-ql-primary dark:text-ql-accent flex items-center gap-1">
+                                    <i class="fa-solid fa-flask-vial"></i> Diagrama Interactivo
+                                </span>
+                                <span class="text-[10px] font-bold text-slate-500">Simulador en Vivo</span>
+                            </div>
+
+                            <div id="theory-sim-canvas" class="flex-1 flex flex-col items-center justify-center py-4">
+                                ${getTheoryInteractiveDiagram(topic)}
+                            </div>
+
+                            <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
+                                ${getTheoryInteractiveControls(topic)}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        function changeTheoryTopic(idx) {
+            selectedTheoryIndex = idx;
+            theorySimState.quizSelected = null;
+            renderTheoryLibrary(document.getElementById('module-content-placeholder'));
+        }
+
+        function checkTheoryQuiz(optIdx) {
+            theorySimState.quizSelected = optIdx;
+            renderTheoryLibrary(document.getElementById('module-content-placeholder'));
+        }
+
+        function getTheoryQuizOptionClass(optIdx, quiz) {
+            if (theorySimState.quizSelected === null) {
+                return 'border-slate-200 dark:border-slate-800 hover:border-purple-300 text-ql-text dark:text-ql-darkText bg-white dark:bg-ql-darkSurface';
+            }
+            if (optIdx === quiz.correctIndex) {
+                return 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300';
+            }
+            if (optIdx === theorySimState.quizSelected) {
+                return 'border-red-500 bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300';
+            }
+            return 'border-slate-200 dark:border-slate-800 text-slate-400 opacity-60 bg-white dark:bg-ql-darkSurface';
+        }
+
+        // Generate Interactive SVG & Controls per Topic
+        function getTheoryInteractiveDiagram(topic) {
+            if (topic.interactiveType === 'atom-simulator') {
+                const p = theorySimState.protons;
+                const n = theorySimState.neutrons;
+                const e = theorySimState.electrons;
+                const mass = p + n;
+                const netCharge = p - e;
+
+                const elementName = p === 1 ? 'Hidrógeno (H)' : (p === 6 ? 'Carbono (C)' : (p === 8 ? 'Oxígeno (O)' : 'Elemento Custom'));
+
+                return `
+                    <div class="flex flex-col items-center space-y-3">
+                        <svg class="w-44 h-44" viewBox="0 0 200 200">
+                            <!-- Orbit Shell 1 -->
+                            <circle cx="100" cy="100" r="50" fill="none" stroke="#93C5FD" stroke-width="2" stroke-dasharray="4 4" class="animate-spin" style="animation-duration: 12s;"></circle>
+                            <!-- Orbit Shell 2 -->
+                            <circle cx="100" cy="100" r="80" fill="none" stroke="#A7F3D0" stroke-width="2" stroke-dasharray="4 4" class="animate-spin" style="animation-duration: 8s; animation-direction: reverse;"></circle>
+                            
+                            <!-- Nucleus -->
+                            <circle cx="100" cy="100" r="24" fill="#692FF4" opacity="0.9"></circle>
+                            <text x="100" y="98" text-anchor="middle" fill="#FFFFFF" font-size="10" font-weight="bold">${p}p⁺</text>
+                            <text x="100" y="110" text-anchor="middle" fill="#E0E7FF" font-size="9" font-weight="bold">${n}n⁰</text>
+
+                            <!-- Orbiting Electrons Dots -->
+                            ${Array.from({ length: Math.min(e, 2) }).map((_, i) => {
+                                const angle = (i * 180) * (Math.PI / 180);
+                                const x = 100 + 50 * Math.cos(angle);
+                                const y = 100 + 50 * Math.sin(angle);
+                                return `<circle cx="${x}" cy="${y}" r="6" fill="#3B82F6"><animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/></circle>`;
+                            }).join('')}
+
+                            ${Array.from({ length: Math.max(0, e - 2) }).map((_, i) => {
+                                const angle = (i * (360 / Math.max(1, e - 2))) * (Math.PI / 180);
+                                const x = 100 + 80 * Math.cos(angle);
+                                const y = 100 + 80 * Math.sin(angle);
+                                return `<circle cx="${x}" cy="${y}" r="6" fill="#10B981"></circle>`;
+                            }).join('')}
+                        </svg>
+
+                        <div class="bg-white dark:bg-ql-darkSurface p-2.5 rounded-xl border border-purple-100 text-center w-full shadow-sm space-y-0.5">
+                            <div class="font-title font-bold text-sm text-ql-primary dark:text-ql-accent">${elementName}</div>
+                            <div class="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                                Masa ($A$): <strong>${mass} u.m.a</strong> | Carga Neta: <strong>${netCharge === 0 ? '0 (Neutro)' : (netCharge > 0 ? `+${netCharge} (Catión)` : `${netCharge} (Anión)`)}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (topic.interactiveType === 'periodic-trends') {
+                return `
+                    <div class="flex flex-col items-center space-y-3 w-full">
+                        <div class="grid grid-cols-4 gap-1.5 w-full text-center">
+                            <div class="p-2 rounded-lg bg-red-400 text-white font-title font-bold text-xs">Bloque s</div>
+                            <div class="p-2 rounded-lg bg-blue-400 text-white font-title font-bold text-xs">Bloque d</div>
+                            <div class="p-2 rounded-lg bg-emerald-400 text-white font-title font-bold text-xs">Bloque p</div>
+                            <div class="p-2 rounded-lg bg-purple-400 text-white font-title font-bold text-xs">Bloque f</div>
+                        </div>
+                        <div class="bg-white dark:bg-ql-darkSurface p-3 rounded-xl border border-purple-100 text-center w-full">
+                            <span class="text-[10px] font-extrabold uppercase text-ql-muted block">Tendencia Activa</span>
+                            <span class="font-title font-bold text-sm text-ql-primary dark:text-ql-accent">
+                                ${theorySimState.trendProp === 'electronegativity' ? '⚡ Electronegatividad (Aumenta ↗️)' : '📏 Radio Atómico (Aumenta ↙️)'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            } else if (topic.interactiveType === 'bond-simulator') {
+                const isCovalent = theorySimState.bondType === 'covalent';
+                return `
+                    <div class="flex flex-col items-center space-y-3">
+                        <div class="flex items-center gap-6 py-4">
+                            <!-- Atom 1 -->
+                            <div class="w-16 h-16 rounded-full bg-blue-500 text-white font-title font-bold text-lg flex items-center justify-center shadow-md relative">
+                                H
+                                ${isCovalent ? '<span class="absolute -right-2 w-3 h-3 bg-yellow-300 rounded-full animate-ping"></span>' : ''}
+                            </div>
+
+                            <!-- Connection Line / Electrons -->
+                            <div class="flex flex-col items-center font-bold text-xs text-slate-500">
+                                <span>${isCovalent ? 'Comparten e⁻' : 'Transferencia e⁻ ➔'}</span>
+                                <div class="w-12 h-1 bg-purple-400 my-1 rounded-full"></div>
+                            </div>
+
+                            <!-- Atom 2 -->
+                            <div class="w-16 h-16 rounded-full ${isCovalent ? 'bg-blue-500' : 'bg-emerald-500'} text-white font-title font-bold text-lg flex items-center justify-center shadow-md">
+                                ${isCovalent ? 'H' : 'Cl⁻'}
+                            </div>
+                        </div>
+
+                        <div class="text-xs font-bold text-center text-ql-text dark:text-ql-darkText">
+                            ${isCovalent ? '🤝 Enlace Covalente: Compartición equitativa de par electrónico' : '⚡ Enlace Iónico: Formación de iones por atracción electrostática'}
+                        </div>
+                    </div>
+                `;
+            } else if (topic.interactiveType === 'balance-simulator') {
+                return `
+                    <div class="flex flex-col items-center space-y-3 w-full">
+                        <div class="flex items-center justify-around w-full bg-white dark:bg-ql-darkSurface p-3 rounded-xl border">
+                            <div class="text-center">
+                                <span class="text-xs font-extrabold text-blue-600 block">Reactivos</span>
+                                <span class="font-title font-bold text-base">4 H &nbsp; 2 O</span>
+                            </div>
+                            <span class="text-xl font-bold text-ql-primary">⚖️ =</span>
+                            <div class="text-center">
+                                <span class="text-xs font-extrabold text-emerald-600 block">Productos</span>
+                                <span class="font-title font-bold text-base">4 H &nbsp; 2 O</span>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">✅ Conservación Perfecta de Masa</span>
+                    </div>
+                `;
+            } else if (topic.interactiveType === 'ph-scale') {
+                return `
+                    <div class="flex flex-col items-center space-y-3 w-full">
+                        <div class="w-full h-8 rounded-xl bg-gradient-to-r from-red-500 via-green-500 to-blue-600 flex items-center justify-between px-3 text-white text-xs font-bold shadow-inner">
+                            <span>0 Ácido</span>
+                            <span>7 Neutro</span>
+                            <span>14 Básico</span>
+                        </div>
+                    </div>
+                `;
+            } else if (topic.interactiveType === 'solubility-simulator') {
+                const count = theorySimState.soluteAmount;
+                const isSaturated = count >= 4;
+                return `
+                    <div class="flex flex-col items-center space-y-3">
+                        <div class="w-24 h-32 border-4 border-t-0 border-slate-300 dark:border-slate-600 rounded-b-2xl bg-blue-100 dark:bg-blue-900/40 relative overflow-hidden flex flex-col justify-end p-1">
+                            ${Array.from({ length: count }).map(() => `
+                                <div class="w-2 h-2 rounded-full bg-amber-600 mx-auto my-0.5 ${isSaturated ? 'animate-bounce' : ''}"></div>
+                            `).join('')}
+                        </div>
+                        <span class="text-xs font-bold ${isSaturated ? 'text-amber-600' : 'text-blue-600'}">
+                            ${isSaturated ? '⚠️ Solución Saturada con Precipitado' : '💧 Solución Insaturada Homogénea'}
+                        </span>
+                    </div>
+                `;
+            }
+            return '';
+        }
+
+        function getTheoryInteractiveControls(topic) {
+            if (topic.interactiveType === 'atom-simulator') {
+                return `
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button onclick="theorySimState.protons = theorySimState.protons === 1 ? 6 : (theorySimState.protons === 6 ? 8 : 1); theorySimState.electrons = theorySimState.protons; theorySimState.neutrons = theorySimState.protons; renderTheoryLibrary(document.getElementById('module-content-placeholder'))" class="bg-purple-100 dark:bg-purple-900/50 text-ql-primary dark:text-ql-accent text-[11px] font-bold p-1.5 rounded-lg">
+                            Cambiar Elemento
+                        </button>
+                        <button onclick="theorySimState.electrons = Math.max(1, theorySimState.electrons - 1); renderTheoryLibrary(document.getElementById('module-content-placeholder'))" class="bg-slate-200 dark:bg-slate-700 text-[11px] font-bold p-1.5 rounded-lg">
+                            e⁻ (-1)
+                        </button>
+                        <button onclick="theorySimState.electrons++; renderTheoryLibrary(document.getElementById('module-content-placeholder'))" class="bg-slate-200 dark:bg-slate-700 text-[11px] font-bold p-1.5 rounded-lg">
+                            e⁻ (+1)
+                        </button>
+                    </div>
+                `;
+            } else if (topic.interactiveType === 'bond-simulator') {
+                return `
+                    <div class="flex gap-2">
+                        <button onclick="theorySimState.bondType = 'covalent'; renderTheoryLibrary(document.getElementById('module-content-placeholder'))" class="btn-pressable text-xs font-bold py-1.5 px-3 rounded-btn flex-1 ${theorySimState.bondType === 'covalent' ? 'bg-ql-primary text-white' : 'bg-slate-200 dark:bg-slate-700'}">
+                            Covalente
+                        </button>
+                        <button onclick="theorySimState.bondType = 'ionic'; renderTheoryLibrary(document.getElementById('module-content-placeholder'))" class="btn-pressable text-xs font-bold py-1.5 px-3 rounded-btn flex-1 ${theorySimState.bondType === 'ionic' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700'}">
+                            Iónico
+                        </button>
+                    </div>
+                `;
+            } else if (topic.interactiveType === 'solubility-simulator') {
+                return `
+                    <div class="flex gap-2">
+                        <button onclick="theorySimState.soluteAmount = Math.min(6, theorySimState.soluteAmount + 1); renderTheoryLibrary(document.getElementById('module-content-placeholder'))" class="btn-pressable bg-ql-primary text-white text-xs font-bold py-1.5 px-3 rounded-btn flex-1">
+                            Agregar Soluto (+1)
+                        </button>
+                        <button onclick="theorySimState.soluteAmount = 1; renderTheoryLibrary(document.getElementById('module-content-placeholder'))" class="bg-slate-200 dark:bg-slate-700 text-xs font-bold py-1.5 px-2 rounded-btn">
+                            Reiniciar
+                        </button>
+                    </div>
+                `;
+            }
+            return `<p class="text-[11px] text-ql-muted dark:text-ql-darkMuted text-center">Interacción habilitada en la gráfica.</p>`;
+        }
+
+        // =========================================================================
+        // 1. LABORATORIO VIRTUAL — PRÁCTICAS SIMULADAS, PASO A PASO Y EXPLICACIONES
+        // =========================================================================
+
+        const labExperiments = [
+            {
+                id: 'ph-lab',
+                title: '1. Medición de pH y Sustancias Cotidianas',
+                icon: '🧪',
+                steps: [
+                    'Selecciona una sustancia líquida de prueba en el selector (ej. Jugo de limón, vinagre, agua pura, jabón).',
+                    'Elige el indicador químico (Papel Tornasol o Extracto de Col Morada).',
+                    'Observa el cambio de coloración resultante en el vaso de precipitados.',
+                    'Registra el valor de pH obtenido en la escala y comprueba si es ácido, neutro o básico.'
+                ],
+                explanation: 'El pH (potencial de hidrógeno) cuantifica la concentración de iones de hidrógeno ($H^+$) en disolución acuosa mediante la fórmula $\\text{pH} = -\\log[H^+]$. Valores menores a 7 indican acidez, igual a 7 neutralidad y mayores a 7 basicidad.',
+                securityNote: 'Simulación virtual completamente segura. No se manipulan ácidos concentrados en el aula.'
+            },
+            {
+                id: 'mass-lab',
+                title: '2. Conservación de la Materia (Lavoisier)',
+                icon: '⚖️',
+                steps: [
+                    'Elige el modo del sistema: Sistema Cerrado (con globo) o Sistema Abierto.',
+                    'Coloca vinagre y bicarbonato de sodio dentro del matraz Erlenmeyer.',
+                    'Haz clic en "Mezclar Reactivos" para iniciar la efervescencia de dióxido de carbono ($CO_2$).',
+                    'Compara el peso inicial y final en la báscula digital.'
+                ],
+                explanation: 'La Ley de la Conservación de la Materia establece que en toda reacción química la masa total de los reactivos es igual a la masa total de los productos. En un sistema abierto, los gases escapan, aparentando pérdida de masa.',
+                securityNote: 'Práctica segura basada en principios estequiométricos fundamentales.'
+            },
+            {
+                id: 'rate-lab',
+                title: '3. Velocidad de Reacción y Temperatura',
+                icon: '🌡️',
+                steps: [
+                    'Ajusta la barra deslizante de temperatura del solvente (desde 10 °C hasta 80 °C).',
+                    'Coloca la pastilla efervescente dentro del vaso de agua.',
+                    'Observa la frecuencia y velocidad de las burbujas generadas.',
+                    'Compara el tiempo de disolución a baja y alta temperatura.'
+                ],
+                explanation: 'Según la teoría de colisiones, al aumentar la temperatura, la energía cinética media de las partículas aumenta, generando choques más frecuentes y efectivos que aceleran la velocidad de reacción.',
+                securityNote: 'Control térmico simulado. Evita quemaduras con líquidos calientes reales.'
+            },
+            {
+                id: 'density-lab',
+                title: '4. Mosaico de Densidades de Líquidos',
+                icon: '💧',
+                steps: [
+                    'Observa la columna de densidad con tres fluidos inmiscibles: Aceite, Agua y Miel.',
+                    'Compara los valores de densidad relativa de cada sustancia.',
+                    'Analiza por qué los fluidos menos densos flotan sobre los más densos.'
+                ],
+                explanation: 'La densidad ($\\rho = \\frac{m}{V}$) determina la flotabilidad de los líquidos inmiscibles. Los líquidos con menor densidad se disponen en las capas superiores.',
+                securityNote: 'Práctica demostrativa sin riesgos físicos.'
+            },
+            {
+                id: 'titration-lab',
+                title: '5. Titulación Ácido-Base (Neutralización)',
+                icon: '🔬',
+                steps: [
+                    'Prepara la bureta con solución valorada de Hidróxido de Sodio ($NaOH$).',
+                    'Añade gotas progresivamente al matraz con ácido y fenolftaleína.',
+                    'Vigila el punto de equivalencia cuando la disolución vire a color rosa tenue.',
+                    'Calcula el volumen neutralizado.'
+                ],
+                explanation: 'La titulación es un método volumétrico para determinar la concentración desconocida de una solución ácida mediante una base de concentración conocida hasta alcanzar la neutralización.',
+                securityNote: 'Simulación interactiva libre de salpicaduras cáusticas.'
+            }
+        ];
+
+        let currentLabIndex = 0;
+        let labState = {
+            phSubstance: 'lemon',
+            phIndicator: 'tornasol',
+            massClosed: true,
+            massReacted: false,
+            tempValue: 25,
+            tempReacted: false,
+            titrationDrops: 0
+        };
+
+        function renderVirtualLab(container) {
+            const exp = labExperiments[currentLabIndex];
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Top Navigation & Random Button -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-purple-50 dark:bg-purple-900/30 p-4 rounded-card border border-purple-200 dark:border-purple-800">
+                        <div>
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-ql-primary dark:text-ql-accent">Simulación Educativa Guiada</span>
+                            <h3 class="font-title font-bold text-xl text-ql-text dark:text-ql-darkText flex items-center gap-2">
+                                <span>${exp.icon}</span> ${exp.title}
+                            </h3>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button onclick="getRandomLab()" class="btn-pressable bg-ql-primary hover:bg-ql-primaryHover text-white text-xs font-extrabold px-3.5 py-2 rounded-btn flex items-center justify-center gap-1.5 w-full sm:w-auto">
+                                <i class="fa-solid fa-shuffle"></i> Práctica Aleatoria
+                            </button>
+                            <select onchange="changeLab(this.value)" class="bg-white dark:bg-ql-darkSurface border border-purple-300 dark:border-purple-700 text-ql-text dark:text-ql-darkText text-xs font-bold rounded-btn px-2.5 py-2">
+                                ${labExperiments.map((e, idx) => `<option value="${idx}" ${idx === currentLabIndex ? 'selected' : ''}>${e.title}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Main Simulation Interactive Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        
+                        <!-- Left Panel: Interactive Visual Bench (7 Cols) -->
+                        <div class="lg:col-span-7 bg-slate-100 dark:bg-slate-900/60 p-5 rounded-card border border-slate-200 dark:border-slate-800 flex flex-col justify-between min-h-[340px] relative overflow-hidden">
+                            <div class="absolute top-3 right-3 bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-[11px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Simulación Interactiva
+                            </div>
+
+                            <div id="lab-visual-area" class="flex-1 flex flex-col items-center justify-center py-6">
+                                ${getLabVisualContent(exp)}
+                            </div>
+
+                            <!-- Interactive Controls Area -->
+                            <div class="bg-white dark:bg-ql-darkSurface p-4 rounded-xl border border-purple-100 dark:border-purple-900/30 space-y-3">
+                                <h4 class="text-xs font-bold uppercase text-ql-muted dark:text-ql-darkMuted">Controles del Experimento</h4>
+                                ${getLabControlsContent(exp)}
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Step-by-Step & Scientific Explanation (5 Cols) -->
+                        <div class="lg:col-span-5 space-y-4">
+                            
+                            <!-- Step-by-Step Instructions -->
+                            <div class="bg-white dark:bg-ql-darkSurface p-4 rounded-card border border-purple-100 dark:border-purple-900/30 space-y-2">
+                                <h4 class="font-title font-bold text-base text-ql-text dark:text-ql-darkText flex items-center gap-2">
+                                    <i class="fa-solid fa-list-check text-ql-primary"></i> Guía Paso a Paso
+                                </h4>
+                                <ol class="space-y-2 text-xs text-ql-muted dark:text-ql-darkMuted list-none">
+                                    ${exp.steps.map((step, i) => `
+                                        <li class="flex items-start gap-2 bg-purple-50/50 dark:bg-purple-950/30 p-2 rounded-lg border border-purple-100 dark:border-purple-900/20">
+                                            <span class="w-5 h-5 rounded-full bg-ql-primary text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">${i + 1}</span>
+                                            <span>${step}</span>
+                                        </li>
+                                    `).join('')}
+                                </ol>
+                            </div>
+
+                            <!-- Scientific Explanation -->
+                            <div class="bg-indigo-50/60 dark:bg-indigo-950/40 p-4 rounded-card border border-indigo-100 dark:border-indigo-900/30 space-y-2">
+                                <h4 class="font-title font-bold text-base text-ql-text dark:text-ql-darkText flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
+                                    <i class="fa-solid fa-atom"></i> Explicación Científica
+                                </h4>
+                                <p class="text-xs text-ql-text dark:text-ql-darkText leading-relaxed">
+                                    ${exp.explanation}
+                                </p>
+                            </div>
+
+                            <!-- Safety Warning -->
+                            <div class="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-card border border-amber-200 dark:border-amber-800/50 flex items-start gap-2.5">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-600 dark:text-amber-400 text-sm mt-0.5 shrink-0"></i>
+                                <p class="text-[11px] text-amber-800 dark:text-amber-300 font-semibold leading-normal">
+                                    <strong>Nota de Seguridad:</strong> ${exp.securityNote}
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getRandomLab() {
+            let nextIndex = Math.floor(Math.random() * labExperiments.length);
+            if (nextIndex === currentLabIndex) {
+                nextIndex = (currentLabIndex + 1) % labExperiments.length;
+            }
+            currentLabIndex = nextIndex;
+            resetLabState();
+            renderVirtualLab(document.getElementById('module-content-placeholder'));
+        }
+
+        function changeLab(index) {
+            currentLabIndex = parseInt(index);
+            resetLabState();
+            renderVirtualLab(document.getElementById('module-content-placeholder'));
+        }
+
+        function resetLabState() {
+            labState = {
+                phSubstance: 'lemon',
+                phIndicator: 'tornasol',
+                massClosed: true,
+                massReacted: false,
+                tempValue: 25,
+                tempReacted: false,
+                titrationDrops: 0
+            };
+        }
+
+        // Generate Visual Representation per Lab
+        function getLabVisualContent(exp) {
+            if (exp.id === 'ph-lab') {
+                const subData = {
+                    lemon: { name: 'Jugo de Limón', ph: 2.2, tornasol: '#DC2626', col: '#EF4444', label: 'Ácido Fuerte' },
+                    vinegar: { name: 'Vinagre', ph: 2.9, tornasol: '#F97316', col: '#F43F5E', label: 'Ácido Moderado' },
+                    water: { name: 'Agua Pura', ph: 7.0, tornasol: '#10B981', col: '#8B5CF6', label: 'Neutro' },
+                    soap: { name: 'Jabón Líquido', ph: 10.5, tornasol: '#2563EB', col: '#10B981', label: 'Básico / Alcalino' }
+                }[labState.phSubstance];
+
+                const activeColor = labState.phIndicator === 'tornasol' ? subData.tornasol : subData.col;
+
+                return `
+                    <div class="flex flex-col items-center gap-4">
+                        <!-- Beaker Visual -->
+                        <div class="relative w-32 h-40 border-4 border-t-0 border-slate-300 dark:border-slate-600 rounded-b-3xl bg-slate-200/30 dark:bg-slate-800/30 overflow-hidden flex flex-col justify-end p-1">
+                            <div class="w-full h-2/3 rounded-b-2xl transition-all duration-500 flex items-center justify-center font-bold text-white text-xs shadow-inner" style="background-color: ${activeColor};">
+                                ${subData.name}
+                            </div>
+                        </div>
+                        <!-- pH Meter Display -->
+                        <div class="bg-white dark:bg-ql-darkSurface border-2 border-ql-primary px-4 py-2 rounded-btn text-center shadow-sm">
+                            <span class="text-[10px] font-extrabold uppercase text-ql-muted dark:text-ql-darkMuted block">Valor de pH Medido</span>
+                            <span class="font-title font-extrabold text-2xl text-ql-primary dark:text-ql-accent tabular-nums">${subData.ph}</span>
+                            <span class="text-xs font-bold block text-slate-600 dark:text-slate-300 mt-0.5">${subData.label}</span>
+                        </div>
+                    </div>
+                `;
+            } else if (exp.id === 'mass-lab') {
+                const currentMass = labState.massReacted 
+                    ? (labState.massClosed ? 150.0 : 142.3) 
+                    : 150.0;
+
+                return `
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="relative flex flex-col items-center">
+                            <!-- Flask Top / Balloon or Open -->
+                            <div class="w-10 h-8 bg-slate-300 dark:bg-slate-700 rounded-t-md flex items-center justify-center">
+                                ${labState.massClosed 
+                                    ? `<div class="w-12 h-12 rounded-full ${labState.massReacted ? 'scale-125 bg-amber-400' : 'bg-amber-300'} transition-transform duration-500 border-2 border-amber-500 flex items-center justify-center text-[10px] font-bold">CO₂</div>`
+                                    : `<span class="text-xs animate-bounce">💨</span>`}
+                            </div>
+                            <!-- Erlenmeyer Flask Body -->
+                            <div class="w-28 h-32 border-4 border-t-0 border-slate-300 dark:border-slate-600 rounded-b-3xl bg-slate-100 dark:bg-slate-800 flex flex-col justify-end overflow-hidden p-1">
+                                <div class="w-full ${labState.massReacted ? 'h-1/2 bg-amber-100 dark:bg-amber-900/60' : 'h-1/3 bg-blue-100 dark:bg-blue-900/60'} rounded-b-2xl transition-all duration-500 flex items-center justify-center">
+                                    ${labState.massReacted ? '🫧 Reacción Efervescente' : 'Vinagre + Bicarbonato'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scale Display -->
+                        <div class="bg-slate-800 text-green-400 font-mono font-bold text-xl px-6 py-2 rounded-xl border-4 border-slate-600 shadow-md">
+                            ${currentMass.toFixed(1)} g
+                        </div>
+                    </div>
+                `;
+            } else if (exp.id === 'rate-lab') {
+                const isHot = labState.tempValue > 50;
+                return `
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="relative w-32 h-36 border-4 border-t-0 border-slate-300 dark:border-slate-600 rounded-b-3xl bg-slate-100 dark:bg-slate-800 flex flex-col justify-end p-1 overflow-hidden">
+                            <!-- Bubbles -->
+                            ${labState.tempReacted ? `
+                                <div class="absolute inset-0 flex flex-wrap items-center justify-center gap-1 opacity-80 animate-pulse">
+                                    ${isHot ? '🫧🫧🫧🫧🫧<br>🫧🫧🫧' : '🫧...🫧'}
+                                </div>
+                            ` : ''}
+                            <div class="w-full h-3/4 ${isHot ? 'bg-orange-200 dark:bg-orange-900/50' : 'bg-blue-200 dark:bg-blue-900/50'} rounded-b-2xl transition-all flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-200">
+                                ${labState.tempValue} °C
+                            </div>
+                        </div>
+                        <div class="text-xs font-bold text-ql-text dark:text-ql-darkText">
+                            ${labState.tempReacted ? (isHot ? '⚡ Reacción Ultrarrápida (Efervescencia alta)' : '🐢 Reacción Lenta (Efervescencia suave)') : 'Esperando reactivo...'}
+                        </div>
+                    </div>
+                `;
+            } else if (exp.id === 'density-lab') {
+                return `
+                    <div class="w-24 h-48 border-4 border-t-0 border-slate-300 dark:border-slate-600 rounded-b-2xl flex flex-col justify-end overflow-hidden p-0.5 bg-slate-50 dark:bg-slate-900 shadow-inner">
+                        <div class="w-full h-1/3 bg-amber-200 dark:bg-amber-800 flex items-center justify-center text-[10px] font-extrabold text-amber-900 dark:text-amber-100 border-b border-amber-300">
+                            Aceite (0.92)
+                        </div>
+                        <div class="w-full h-1/3 bg-blue-400 dark:bg-blue-700 flex items-center justify-center text-[10px] font-extrabold text-white border-b border-blue-500">
+                            Agua (1.00)
+                        </div>
+                        <div class="w-full h-1/3 bg-amber-700 dark:bg-amber-950 flex items-center justify-center text-[10px] font-extrabold text-amber-100">
+                            Miel (1.40)
+                        </div>
+                    </div>
+                `;
+            } else if (exp.id === 'titration-lab') {
+                const isEquivalence = labState.titrationDrops >= 7;
+                return `
+                    <div class="flex items-center gap-6">
+                        <!-- Burette -->
+                        <div class="flex flex-col items-center">
+                            <div class="w-3 h-28 bg-slate-200 dark:bg-slate-700 border border-slate-400 rounded-t flex flex-col justify-end">
+                                <div class="w-full bg-blue-300 transition-all" style="height: ${Math.max(10, 100 - labState.titrationDrops * 10)}%;"></div>
+                            </div>
+                            <div class="w-1 h-4 bg-slate-500"></div>
+                            <span class="text-xs animate-bounce">💧</span>
+                        </div>
+                        <!-- Flask Below -->
+                        <div class="w-28 h-32 border-4 border-t-0 border-slate-300 dark:border-slate-600 rounded-b-3xl bg-slate-100 dark:bg-slate-800 flex flex-col justify-end overflow-hidden p-1">
+                            <div class="w-full h-1/2 rounded-b-2xl transition-all duration-500 flex items-center justify-center text-xs font-bold ${isEquivalence ? 'bg-pink-400 text-white' : 'bg-transparent text-slate-500'}">
+                                ${isEquivalence ? 'Rosa tenue (pH = 7.0)' : 'Incoloro (Ácido)'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            return '';
+        }
+
+        // Interactive Controls per Lab
+        function getLabControlsContent(exp) {
+            if (exp.id === 'ph-lab') {
+                return `
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[11px] font-bold block mb-1">Sustancia:</label>
+                            <select onchange="labState.phSubstance = this.value; renderVirtualLab(document.getElementById('module-content-placeholder'))" class="w-full bg-slate-50 dark:bg-slate-800 border text-xs font-bold rounded-lg p-1.5">
+                                <option value="lemon" ${labState.phSubstance === 'lemon' ? 'selected' : ''}>Jugo de Limón</option>
+                                <option value="vinegar" ${labState.phSubstance === 'vinegar' ? 'selected' : ''}>Vinagre</option>
+                                <option value="water" ${labState.phSubstance === 'water' ? 'selected' : ''}>Agua Pura</option>
+                                <option value="soap" ${labState.phSubstance === 'soap' ? 'selected' : ''}>Jabón Líquido</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold block mb-1">Indicador:</label>
+                            <select onchange="labState.phIndicator = this.value; renderVirtualLab(document.getElementById('module-content-placeholder'))" class="w-full bg-slate-50 dark:bg-slate-800 border text-xs font-bold rounded-lg p-1.5">
+                                <option value="tornasol" ${labState.phIndicator === 'tornasol' ? 'selected' : ''}>Papel Tornasol</option>
+                                <option value="col" ${labState.phIndicator === 'col' ? 'selected' : ''}>Extracto Col Morada</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (exp.id === 'mass-lab') {
+                return `
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <button onclick="labState.massClosed = !labState.massClosed; renderVirtualLab(document.getElementById('module-content-placeholder'))" class="btn-pressable bg-slate-200 dark:bg-slate-700 text-ql-text dark:text-ql-darkText text-xs font-bold px-3 py-2 rounded-btn flex-1">
+                            Modo: ${labState.massClosed ? '🔒 Sistema Cerrado' : '🔓 Sistema Abierto'}
+                        </button>
+                        <button onclick="labState.massReacted = true; renderVirtualLab(document.getElementById('module-content-placeholder'))" class="btn-pressable bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-btn flex-1">
+                            Mezclar Reactivos
+                        </button>
+                    </div>
+                `;
+            } else if (exp.id === 'rate-lab') {
+                return `
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-xs font-bold">
+                            <span>Temperatura del Solvente:</span>
+                            <span class="text-ql-primary font-title">${labState.tempValue} °C</span>
+                        </div>
+                        <input type="range" min="10" max="80" value="${labState.tempValue}" oninput="labState.tempValue = parseInt(this.value); renderVirtualLab(document.getElementById('module-content-placeholder'))" class="w-full accent-ql-primary">
+                        <button onclick="labState.tempReacted = true; renderVirtualLab(document.getElementById('module-content-placeholder'))" class="btn-pressable bg-ql-primary text-white text-xs font-bold px-3 py-2 rounded-btn w-full">
+                            Añadir Pastilla Efervescente
+                        </button>
+                    </div>
+                `;
+            } else if (exp.id === 'density-lab') {
+                return `
+                    <p class="text-xs text-ql-muted dark:text-ql-darkMuted">
+                        Observación activa de gradiente de densidades de fluidos inmiscibles.
+                    </p>
+                `;
+            } else if (exp.id === 'titration-lab') {
+                return `
+                    <div class="flex gap-2">
+                        <button onclick="labState.titrationDrops++; renderVirtualLab(document.getElementById('module-content-placeholder'))" class="btn-pressable bg-ql-primary text-white text-xs font-bold px-3 py-2 rounded-btn flex-1">
+                            Añadir Gota NaOH (+1)
+                        </button>
+                        <button onclick="labState.titrationDrops = 0; renderVirtualLab(document.getElementById('module-content-placeholder'))" class="bg-slate-200 dark:bg-slate-700 text-xs font-bold px-3 py-2 rounded-btn">
+                            Reiniciar
+                        </button>
+                    </div>
+                `;
+            }
+            return '';
+        }
+
+        // =========================================================================
+        // 2. EDITOR DE MOLÉCULAS EN RED / GRID INTERACTIVA CON VALENCIAS Y PRESETS
+        // =========================================================================
+
+        const atomPalette = [
+            { symbol: 'H', name: 'Hidrógeno', valency: 1, color: '#3B82F6', bg: 'bg-blue-500' },
+            { symbol: 'C', name: 'Carbono', valency: 4, color: '#374151', bg: 'bg-gray-700' },
+            { symbol: 'O', name: 'Oxígeno', valency: 2, color: '#EF4444', bg: 'bg-red-500' },
+            { symbol: 'N', name: 'Nitrógeno', valency: 3, color: '#8B5CF6', bg: 'bg-purple-600' },
+            { symbol: 'Na', name: 'Sodio', valency: 1, color: '#F59E0B', bg: 'bg-amber-500' },
+            { symbol: 'Cl', name: 'Cloro', valency: 1, color: '#10B981', bg: 'bg-emerald-500' }
+        ];
+
+        // Known preset structures mapped to grid nodes (3x3 grid)
+        const moleculePresets = [
+            {
+                name: 'Agua (H₂O)',
+                formula: 'H2O',
+                atoms: [
+                    { row: 1, col: 1, symbol: 'O' },
+                    { row: 1, col: 0, symbol: 'H' },
+                    { row: 1, col: 2, symbol: 'H' }
+                ],
+                bonds: [
+                    { from: '1-1', to: '1-0', order: 1 },
+                    { from: '1-1', to: '1-2', order: 1 }
+                ]
+            },
+            {
+                name: 'Dióxido de Carbono (CO₂)',
+                formula: 'CO2',
+                atoms: [
+                    { row: 1, col: 1, symbol: 'C' },
+                    { row: 1, col: 0, symbol: 'O' },
+                    { row: 1, col: 2, symbol: 'O' }
+                ],
+                bonds: [
+                    { from: '1-1', to: '1-0', order: 2 },
+                    { from: '1-1', to: '1-2', order: 2 }
+                ]
+            },
+            {
+                name: 'Metano (CH₄)',
+                formula: 'CH4',
+                atoms: [
+                    { row: 1, col: 1, symbol: 'C' },
+                    { row: 0, col: 1, symbol: 'H' },
+                    { row: 2, col: 1, symbol: 'H' },
+                    { row: 1, col: 0, symbol: 'H' },
+                    { row: 1, col: 2, symbol: 'H' }
+                ],
+                bonds: [
+                    { from: '1-1', to: '0-1', order: 1 },
+                    { from: '1-1', to: '2-1', order: 1 },
+                    { from: '1-1', to: '1-0', order: 1 },
+                    { from: '1-1', to: '1-2', order: 1 }
+                ]
+            },
+            {
+                name: 'Amoníaco (NH₃)',
+                formula: 'NH3',
+                atoms: [
+                    { row: 1, col: 1, symbol: 'N' },
+                    { row: 0, col: 1, symbol: 'H' },
+                    { row: 1, col: 0, symbol: 'H' },
+                    { row: 1, col: 2, symbol: 'H' }
+                ],
+                bonds: [
+                    { from: '1-1', to: '0-1', order: 1 },
+                    { from: '1-1', to: '1-0', order: 1 },
+                    { from: '1-1', to: '1-2', order: 1 }
+                ]
+            }
+        ];
+
+        let editorState = {
+            selectedAtomSymbol: 'C',
+            mode: 'place', // 'place' or 'bond'
+            selectedNodeKey: null,
+            gridAtoms: {}, // key: "row-col", value: atomSymbol
+            bonds: [] // { from, to, order }
+        };
+
+        function renderMoleculeEditor(container) {
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Top Bar with Presets & Action Buttons -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-purple-50 dark:bg-purple-900/30 p-4 rounded-card border border-purple-200 dark:border-purple-800">
+                        <div>
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-ql-primary dark:text-ql-accent">Red Interactiva de Átomos y Enlaces</span>
+                            <h3 class="font-title font-bold text-xl text-ql-text dark:text-ql-darkText">Constructor Molecular en Grid</h3>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                            <select onchange="loadMoleculePreset(this.value)" class="bg-white dark:bg-ql-darkSurface border border-purple-300 dark:border-purple-700 text-ql-text dark:text-ql-darkText text-xs font-bold rounded-btn px-3 py-2">
+                                <option value="">-- Cargar Plantilla Preset --</option>
+                                ${moleculePresets.map((p, idx) => `<option value="${idx}">${p.name}</option>`).join('')}
+                            </select>
+                            <button onclick="clearEditorGrid()" class="bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 hover:bg-red-200 text-xs font-bold px-3 py-2 rounded-btn transition-colors">
+                                <i class="fa-solid fa-trash-can mr-1"></i> Limpiar Red
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Main Grid Canvas Work Area -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        
+                        <!-- Left Palette Controls (4 Cols) -->
+                        <div class="lg:col-span-4 space-y-4">
+                            
+                            <!-- Tool Mode Selector -->
+                            <div class="bg-white dark:bg-ql-darkSurface p-4 rounded-card border border-purple-100 dark:border-purple-900/30 space-y-2">
+                                <label class="text-xs font-bold text-ql-muted dark:text-ql-darkMuted uppercase block">Modo de Herramienta</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button onclick="setEditorTool('place')" class="btn-pressable text-xs font-bold py-2.5 rounded-btn flex items-center justify-center gap-1.5 ${editorState.mode === 'place' ? 'bg-ql-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-ql-text dark:text-ql-darkText'}">
+                                        <i class="fa-solid fa-plus-circle"></i> Agregar Átomo
+                                    </button>
+                                    <button onclick="setEditorTool('bond')" class="btn-pressable text-xs font-bold py-2.5 rounded-btn flex items-center justify-center gap-1.5 ${editorState.mode === 'bond' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-ql-text dark:text-ql-darkText'}">
+                                        <i class="fa-solid fa-link"></i> Crear Enlace
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Atom Palette Selection -->
+                            <div class="bg-white dark:bg-ql-darkSurface p-4 rounded-card border border-purple-100 dark:border-purple-900/30 space-y-2">
+                                <label class="text-xs font-bold text-ql-muted dark:text-ql-darkMuted uppercase block">Seleccionar Elemento Químico</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    ${atomPalette.map(a => `
+                                        <button onclick="selectAtomSymbol('${a.symbol}')" class="p-2 rounded-xl border-2 transition-all flex flex-col items-center gap-0.5 ${editorState.selectedAtomSymbol === a.symbol ? 'border-ql-primary bg-purple-50 dark:bg-purple-900/30 scale-105' : 'border-slate-200 dark:border-slate-800 hover:border-purple-300'}">
+                                            <span class="w-7 h-7 rounded-full text-white font-title font-bold text-xs flex items-center justify-center ${a.bg}">${a.symbol}</span>
+                                            <span class="text-[10px] font-bold text-ql-text dark:text-ql-darkText">${a.name}</span>
+                                            <span class="text-[9px] text-ql-muted dark:text-ql-darkMuted">Val: ${a.valency}</span>
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <!-- Molecular Analysis Box -->
+                            <div class="bg-white dark:bg-ql-darkSurface p-4 rounded-card border border-purple-100 dark:border-purple-900/30 space-y-3">
+                                <h4 class="font-title font-bold text-sm text-ql-text dark:text-ql-darkText flex items-center gap-2">
+                                    <i class="fa-solid fa-magnifying-glass-chart text-ql-primary"></i> Análisis Molecular
+                                </h4>
+                                <div id="molecule-analysis-content">
+                                    ${getMoleculeAnalysisHTML()}
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Grid Interactive Area (8 Cols) -->
+                        <div class="lg:col-span-8 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-card border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center mol-grid-bg min-h-[380px] relative overflow-hidden">
+                            
+                            <div class="text-xs text-ql-muted dark:text-ql-darkMuted mb-3 font-semibold">
+                                ${editorState.mode === 'place' ? 'Haz clic en un nodo de la red para colocar/quitar el átomo seleccionado.' : 'Haz clic consecutivamente en 2 átomos adyacentes para conectar o aumentar enlace.'}
+                            </div>
+
+                            <!-- 3x3 Grid Canvas Container -->
+                            <div class="relative grid grid-cols-3 gap-8 sm:gap-12 p-4 bg-white/80 dark:bg-ql-darkSurface/80 backdrop-blur rounded-card border border-purple-100 dark:border-purple-900/30 shadow-md">
+                                ${renderGridNodes()}
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        function setEditorTool(mode) {
+            editorState.mode = mode;
+            editorState.selectedNodeKey = null;
+            renderMoleculeEditor(document.getElementById('module-content-placeholder'));
+        }
+
+        function selectAtomSymbol(symbol) {
+            editorState.selectedAtomSymbol = symbol;
+            editorState.mode = 'place';
+            renderMoleculeEditor(document.getElementById('module-content-placeholder'));
+        }
+
+        function handleNodeClick(row, col) {
+            const nodeKey = `${row}-${col}`;
+
+            if (editorState.mode === 'place') {
+                if (editorState.gridAtoms[nodeKey]) {
+                    // Remove atom and related bonds
+                    delete editorState.gridAtoms[nodeKey];
+                    editorState.bonds = editorState.bonds.filter(b => b.from !== nodeKey && b.to !== nodeKey);
+                } else {
+                    // Place selected atom
+                    editorState.gridAtoms[nodeKey] = editorState.selectedAtomSymbol;
+                }
+            } else if (editorState.mode === 'bond') {
+                if (!editorState.gridAtoms[nodeKey]) return; // Must click an existing atom
+
+                if (!editorState.selectedNodeKey) {
+                    // First node selected for bonding
+                    editorState.selectedNodeKey = nodeKey;
+                } else if (editorState.selectedNodeKey === nodeKey) {
+                    // Deselect if same node clicked
+                    editorState.selectedNodeKey = null;
+                } else {
+                    // Second node selected -> create or update bond
+                    const from = editorState.selectedNodeKey;
+                    const to = nodeKey;
+                    
+                    const existingIndex = editorState.bonds.findIndex(b => 
+                        (b.from === from && b.to === to) || (b.from === to && b.to === from)
+                    );
+
+                    if (existingIndex >= 0) {
+                        // Increase bond order up to triple, or remove if already triple
+                        if (editorState.bonds[existingIndex].order < 3) {
+                            editorState.bonds[existingIndex].order++;
+                        } else {
+                            editorState.bonds.splice(existingIndex, 1);
+                        }
+                    } else {
+                        // Create new single bond
+                        editorState.bonds.push({ from, to, order: 1 });
+                    }
+                    editorState.selectedNodeKey = null;
+                }
+            }
+            renderMoleculeEditor(document.getElementById('module-content-placeholder'));
+        }
+
+        function renderGridNodes() {
+            let html = '';
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 3; c++) {
+                    const nodeKey = `${r}-${c}`;
+                    const atomSymbol = editorState.gridAtoms[nodeKey];
+                    const isSelectedForBond = editorState.selectedNodeKey === nodeKey;
+
+                    let atomBg = 'bg-slate-200 dark:bg-slate-700 text-slate-400';
+                    if (atomSymbol) {
+                        const paletteItem = atomPalette.find(a => a.symbol === atomSymbol);
+                        if (paletteItem) atomBg = `${paletteItem.bg} text-white font-bold shadow-md scale-110`;
+                    }
+
+                    html += `
+                        <button onclick="handleNodeClick(${r}, ${c})" class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 ${isSelectedForBond ? 'border-amber-400 ring-4 ring-amber-200 animate-pulse' : 'border-purple-200 dark:border-purple-800'} ${atomBg} flex flex-col items-center justify-center transition-all hover:scale-105">
+                            ${atomSymbol ? `
+                                <span class="font-title font-bold text-base sm:text-lg">${atomSymbol}</span>
+                                <span class="text-[9px] uppercase font-bold opacity-80">${getAtomConnectedBonds(nodeKey)}/${getAtomValency(atomSymbol)} Enl</span>
+                            ` : `<i class="fa-solid fa-plus text-slate-300 dark:text-slate-600 text-xs"></i>`}
+                        </button>
+                    `;
+                }
+            }
+            return html;
+        }
+
+        function getAtomValency(symbol) {
+            const item = atomPalette.find(a => a.symbol === symbol);
+            return item ? item.valency : 1;
+        }
+
+        function getAtomConnectedBonds(nodeKey) {
+            let total = 0;
+            editorState.bonds.forEach(b => {
+                if (b.from === nodeKey || b.to === nodeKey) {
+                    total += b.order;
+                }
+            });
+            return total;
+        }
+
+        function getMoleculeAnalysisHTML() {
+            const atomKeys = Object.keys(editorState.gridAtoms);
+            if (atomKeys.length === 0) {
+                return `<p class="text-xs text-ql-muted dark:text-ql-darkMuted italic">Coloca átomos en la red para comenzar el análisis de valencias y fórmula.</p>`;
+            }
+
+            // Calculate formula
+            const counts = {};
+            atomKeys.forEach(k => {
+                const sym = editorState.gridAtoms[k];
+                counts[sym] = (counts[sym] || 0) + 1;
+            });
+
+            let formulaStr = '';
+            Object.keys(counts).forEach(sym => {
+                formulaStr += `${sym}${counts[sym] > 1 ? counts[sym] : ''}`;
+            });
+
+            // Check valency validity
+            let isValencyValid = true;
+            let valencyErrors = [];
+
+            atomKeys.forEach(k => {
+                const sym = editorState.gridAtoms[k];
+                const requiredVal = getAtomValency(sym);
+                const actualVal = getAtomConnectedBonds(k);
+                if (actualVal !== requiredVal) {
+                    isValencyValid = false;
+                    valencyErrors.push(`${sym} (${k}): tiene ${actualVal} enlaces, requiere ${requiredVal}`);
+                }
+            });
+
+            // Match known molecule presets
+            let matchedName = null;
+            moleculePresets.forEach(p => {
+                if (p.formula === formulaStr && isValencyValid) {
+                    matchedName = p.name;
+                }
+            });
+
+            return `
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-ql-muted dark:text-ql-darkMuted">Fórmula Provisional:</span>
+                        <span class="font-title font-extrabold text-lg text-ql-primary dark:text-ql-accent">${formulaStr}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between border-t border-purple-100 dark:border-purple-900/30 pt-2">
+                        <span class="text-xs font-bold text-ql-muted dark:text-ql-darkMuted">Valencias Satisfechas:</span>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded-full ${isValencyValid ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">
+                            ${isValencyValid ? '✅ Válidas' : '⚠️ Incompletas'}
+                        </span>
+                    </div>
+
+                    ${matchedName ? `
+                        <div class="bg-emerald-50 dark:bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800 text-center">
+                            <span class="text-[10px] font-extrabold uppercase text-emerald-600 block">¡Estructura Reconocida!</span>
+                            <span class="font-title font-bold text-sm text-emerald-800 dark:text-emerald-300">${matchedName}</span>
+                        </div>
+                    ` : ''}
+
+                    ${valencyErrors.length > 0 ? `
+                        <div class="text-[10px] text-red-600 dark:text-red-400 space-y-0.5 bg-red-50 dark:bg-red-950/30 p-2 rounded-lg border border-red-100">
+                            <strong>Atención de Valencias:</strong>
+                            <ul class="list-disc list-inside">
+                                ${valencyErrors.map(err => `<li>${err}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function loadMoleculePreset(presetIndex) {
+            if (presetIndex === "") return;
+            const preset = moleculePresets[parseInt(presetIndex)];
+            if (!preset) return;
+
+            editorState.gridAtoms = {};
+            editorState.bonds = [];
+
+            preset.atoms.forEach(a => {
+                editorState.gridAtoms[`${a.row}-${a.col}`] = a.symbol;
+            });
+
+            preset.bonds.forEach(b => {
+                editorState.bonds.push({ ...b });
+            });
+
+            renderMoleculeEditor(document.getElementById('module-content-placeholder'));
+        }
+
+        function clearEditorGrid() {
+            editorState.gridAtoms = {};
+            editorState.bonds = [];
+            editorState.selectedNodeKey = null;
+            renderMoleculeEditor(document.getElementById('module-content-placeholder'));
+        }
+
+        // Initialize App
+        window.onload = function() {
+            navigate('home');
+        };
+    </script>
+</body>
+</html>
